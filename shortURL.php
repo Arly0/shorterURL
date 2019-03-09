@@ -5,7 +5,7 @@ $url = $_POST['full_url'];
 $shortURL = randomURL();
 echo $shortURL;
 
-function randomURL(){
+function randomURL(){ //function
     $symb       = 'abcdefghijklmnopqrstuvwxyz1234567890';
     $len        = rand(5,8);
     $symbLen    = strlen($symb);
