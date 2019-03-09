@@ -6,7 +6,7 @@ $shortURL = randomURL();
 echo $shortURL;
 
 function randomURL(){
-    $symb       = 'abcdefghijklmnopqrstuvwxyz1234567890';
+    $symb       = 'abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
     $len        = rand(5,8);
     $symbLen    = strlen($symb);
     $symbol_arr = str_split($symb);
@@ -14,15 +14,7 @@ function randomURL(){
 
     for($i=0;$i<$len;$i++)
     {
-        $register = rand(0,1);
-
-        function ($symbol_arr, $symbLen, $register){
-            if ($register)
-                return $obj = $symbol_arr[strtoupper(rand(1,$symbLen))]; // случаное генерирование короткого url
-            else
-                return $obj = $symbol_arr[strtolower(rand(1,$symbLen))]; // случаное генерирование короткого url
-        };
-        $string .= $obj;
+             $string .= $symbol_arr[rand(1,$symbLen)];
     }
     return $string;
 }
