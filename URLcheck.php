@@ -11,7 +11,7 @@ $result = mysqli_query($link, $querySelect);
 //если строк с результатом не равны 0 , т е больше, то выводит директорию к этому урлу
 if(mysqli_num_rows($result) != 0)
 {
-    echo "Данный URL занят. ВОт его директория:<br>";
+    echo "URL занят. ВОт его директория:<br>";
     $row = mysqli_fetch_assoc($result);
     echo $row['directory'];
 }

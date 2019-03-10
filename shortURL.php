@@ -1,9 +1,16 @@
 <?php
 
 $url = $_POST['full_url'];
+$domen = parse_url($url);
+$domen = $domen['host'];
 
 $shortURL = randomURL();
-echo $shortURL;
+
+$newurl = "$domen/$shortURL";
+
+echo "<a href='#'>$newurl</a>";
+
+
 
 function randomURL(){
     $symb       = 'abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
