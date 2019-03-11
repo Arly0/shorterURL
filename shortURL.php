@@ -1,22 +1,22 @@
 <?php
-include_once ("DBconnection.php");
+include_once ("DBconnection.php"); // функция подключает файл ЕДИНОЖДЫ
 $url = $_POST['full_url'];
 checkDir($url,$link);
-$domen = parse_url($url);
-$domen = $domen['host'];
+$domen = parse_url($url); // ф-ия разбивает урл на протокол, домен, директорию и тд
+$domen = $domen['host']; // получаем домен
 
-WrongDomain:
+WrongDomain:    // чтобы можно было сгенерировать короткий урл сначала, если такой существует
 
-$shortURL = randomURL();
+$shortURL = randomURL(); // генерация урла
 
-$newurl = "$domen/$shortURL";
+$newurl = "$domen/$shortURL";   // конкатенация домена и урла
 
-$res = checkURL($newurl,$link);
+$res = checkURL($newurl,$link);     // проверяет на наличие новоиспеченного адреса в БД
 if (!$res){
-    goto WrongDomain;
+    goto WrongDomain;   // если результат был ложным - вернет к 8 строке и проведет генерацию по новой
 }
 
-saveURL($newurl,$url,$link);
+saveURL($newurl,$url,$link);    // сэйв урла в БД
 
 echo "УРЛ успешно добавлен: <a href='#'>$newurl</a>";
 
@@ -36,17 +36,17 @@ function randomURL(){
     return $string;
 }
 
-function checkDir($dir,$conn){
+function checkDir($dir,$conn){ // проверка на наличие дириктории в БД
     $querySelect = "SELECT * FROM `URL_path` WHERE `directory` = '$dir'";
     $queryTake   = "SELECT `url` FROM `URL_path` WHERE `directory` = '$dir'"; // выводит короткий урл в соотв с дир
 
     $result = mysqli_query($conn,$querySelect);
     if(mysqli_num_rows($result) != 0){
         echo "Такая директория уже имеет сокрощенный URL. Вот она:"; //добавить вывод короткого урла через переменную кверитэйк
-        exit();
+        exit(); // убивает скрипт
     }
     else{
-        return 1;
+        return 1; // продолжает работу
     }
 }
 
@@ -66,13 +66,11 @@ function checkURL($url,$conn){
 function saveURL($url,$dir,$conn){
     $querySave = "INSERT INTO `URL_path` (`url`, `directory`) VALUES ('$url', '$dir')";
 
-    $result = mysqli_query($conn,$querySave);
-    if($result)
-    {
-        return 1;
-    }
-    else{
+    try {mysqli_query($conn,$querySave);}
+
+    catch(Exception $e){
         echo mysqli_connect_errno();
+        echo ("\n" . $e -> getMessage());
         exit();
     }
 }
