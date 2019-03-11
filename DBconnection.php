@@ -1,14 +1,15 @@
 <?php
 
-$host   = 'localhost'; //variable
-$nameDB = 'users';
-$user   = 'root';
-$pass   = '';
-
-$link = mysqli_connect($host, $user, $pass, $nameDB);
-
-if(!$link) {
-    echo ("connection error: " . mysqli_connect_errno());
+$name = 'users';
+$host = 'localhost';
+$pass = '';
+$user = 'root';
+try {
+    $pdoConnect = new PDO("mysql:dname=$name;host=$host, $user, $pass");
+}
+catch (Exception $ex){
+    echo "Connection error: " . $ex->getMessage();
     exit();
 }
+
 ?>

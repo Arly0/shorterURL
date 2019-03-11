@@ -1,7 +1,7 @@
 <?php
 include_once ("DBconnection.php"); // функция подключает файл ЕДИНОЖДЫ
 $url = $_POST['full_url'];
-checkDir($url,$link);
+checkDir($url,$pdoConnect);
 $domen = parse_url($url); // ф-ия разбивает урл на протокол, домен, директорию и тд
 $domen = $domen['host']; // получаем домен
 
@@ -11,12 +11,12 @@ $shortURL = randomURL(); // генерация урла
 
 $newurl = "$domen/$shortURL";   // конкатенация домена и урла
 
-$res = checkURL($newurl,$link);     // проверяет на наличие новоиспеченного адреса в БД
+$res = checkURL($newurl,$pdoConnect);     // проверяет на наличие новоиспеченного адреса в БД
 if (!$res){
     goto WrongDomain;   // если результат был ложным - вернет к 8 строке и проведет генерацию по новой
 }
 
-saveURL($newurl,$url,$link);    // сэйв урла в БД
+saveURL($newurl,$url,$pdoConnect);    // сэйв урла в БД
 
 echo "УРЛ успешно добавлен: <a href='#'>$newurl</a>";
 
@@ -36,12 +36,11 @@ function randomURL(){
     return $string;
 }
 
-function checkDir($dir,$conn){ // проверка на наличие дириктории в БД
-    $querySelect = "SELECT * FROM `URL_path` WHERE `directory` = '$dir'";
-    $queryTake   = "SELECT `url` FROM `URL_path` WHERE `directory` = '$dir'"; // выводит короткий урл в соотв с дир
+function checkDir($dir,$pdoConnect){ // проверка на наличие дириктории в БД
+    $queryTake = $pdoConnect->prepare("SELECT `url` FROM `URL_path` WHERE `directory` = :directory"); // выводит короткий урл в соотв с дир
+    $queryTake->bindValue(':directory' , $dir, PDO::PARAM_STR);
 
-    $result = mysqli_query($conn,$querySelect);
-    if(mysqli_num_rows($result) != 0){
+    if($queryTake->execute()){
         echo "Такая директория уже имеет сокрощенный URL. Вот она:"; //добавить вывод короткого урла через переменную кверитэйк
         exit(); // убивает скрипт
     }
@@ -50,11 +49,11 @@ function checkDir($dir,$conn){ // проверка на наличие дири�
     }
 }
 
-function checkURL($url,$conn){
-    $querySelect = "SELECT * FROM `URL_path` WHERE `url` = '$url'";
+function checkURL($url,$pdoConnect){
+    $querySelect = $pdoConnect->prepare("SELECT * FROM `URL_path` WHERE `url` = :url");
+    $querySelect->bindValue(':url', $url, PDO::PARAM_STR);
 
-    $result = mysqli_query($conn, $querySelect);
-    if(mysqli_num_rows($result) !=0 )
+    if($querySelect->execute() )
     {
         return false;
     }
@@ -64,13 +63,16 @@ function checkURL($url,$conn){
 }
 
 function saveURL($url,$dir,$conn){
-    $querySave = "INSERT INTO `URL_path` (`url`, `directory`) VALUES ('$url', '$dir')";
+    $querySave = $conn->prepare('INSERT INTO `URL_path` (`url`, `directory`) VALUES (:$url, :$dir)');
+    $querySave->bindValue(':url', $url, PDO::PARAM_STR);
+    $querySave->bindValue(':dir', $dir, PDO::PARAM_STR);
 
-    try {mysqli_query($conn,$querySave);}
+    try {
+        $querySave->execute();
+    }
 
     catch(Exception $e){
-        echo mysqli_connect_errno();
-        echo ("\n" . $e -> getMessage());
+        echo 'Cant add in DB' . $e->getMessage();
         exit();
     }
 }

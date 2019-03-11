@@ -3,15 +3,10 @@ include_once ("DBconnection.php");
 // проверка на наличие короткого URL и получение пути
 $url = $_POST['url'];
 
-$querySelect = "SELECT * FROM `URL_path` WHERE `url` = '$url'";
+$querySelect = $pdoConnect->prepare("SELECT * FROM `URL_path` WHERE `url` = :url");
+$querySelect->bindValue(':url', $url, PDO::PARAM_STR);
 
-// запрос в бд
-$result = mysqli_query($link, $querySelect);
-
-//если строк с результатом не равны 0 , т е больше, то выводит директорию к этому урлу
-if(mysqli_num_rows($result) != 0)
+if($querySelect->execute())
 {
-    echo "URL занят. ВОт его директория:<br>";
-    $row = mysqli_fetch_assoc($result);
-    echo $row['directory'];
+    echo "URL занят.<br>";
 }
